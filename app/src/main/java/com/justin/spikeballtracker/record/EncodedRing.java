@@ -66,12 +66,11 @@ public final class EncodedRing {
      *
      * @param src bytes from {@code src.position()} to {@code src.limit()}; the
      *            buffer's position is left unchanged
-     * @return false if the packet is larger than the whole ring and was dropped
      */
-    public boolean add(ByteBuffer src, long pts, boolean isKeyFrame) {
+    public void add(ByteBuffer src, long pts, boolean isKeyFrame) {
         int n = src.remaining();
         if (n > data.length) {
-            return false;
+            return;
         }
 
         // Evict on time first, then on space and slots.
@@ -100,7 +99,6 @@ public final class EncodedRing {
         }
         usedBytes += n;
         tailSeq++;
-        return true;
     }
 
     /** What a save should mux: packets [startSeq, endSeq). */

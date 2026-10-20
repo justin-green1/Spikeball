@@ -1,6 +1,5 @@
 package com.justin.spikeballtracker.tracking;
 
-import java.util.List;
 
 /**
  * Remembers where blobs keep appearing, so static clutter can be ignored.
@@ -53,14 +52,6 @@ public class OccupancyGrid {
     /** Counts one blob centred at (x, y) in the current frame. */
     public void hit(double x, double y){
         grid[row(y)][col(x)] += 1f;
-    }
-
-    /** {@link #nextFrame()}, then one {@link #hit} per detection. */
-    public void update(List<BallCandidate> detections){
-        nextFrame();
-        for (BallCandidate d : detections){
-            hit(d.x, d.y);
-        }
     }
 
     /** True when (x, y)'s cell is static. Read before this frame's update. */
