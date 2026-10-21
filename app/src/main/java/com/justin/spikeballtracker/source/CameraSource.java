@@ -254,21 +254,13 @@ public final class CameraSource {
             List<RallyDetector.Rally> rallies = current.pipeline.process(yuv, timestampUs, rgb);
             reportRallies(current, rallies, rallyListener);
 
-            target.onDisplayFrame(orientForDisplay(proxy.getImageInfo().getRotationDegrees()));
-
         } catch (Exception e) {
             Log.e(TAG, "camera frame failed", e);
         } finally {
             proxy.close();   // without this the buffer pool drains and the stream stops
         }
     }
-
-    /**
-     * If anyone is listening, asks the replay buffer to copy each rally's
-     * footage, the rally plus its margins, and hand both to the listener.
-     * The copy happens on the Recorder thread, so the analyser never waits
-     * for it. Analysis thread only.
-     */
+    
     private void reportRallies(Run run, List<RallyDetector.Rally> rallies,
                                RallyListener listener) {
         if (listener == null) {
@@ -286,27 +278,6 @@ public final class CameraSource {
         }
     }
 
-    /**
-     * Locked to landscape this is always 0 and the frame passes through
-     * untouched. Kept as a guard, not as a feature.
-     */
-    private Mat orientForDisplay(int rotationDegrees) {
-        switch (rotationDegrees) {
-            case 90:
-                Core.rotate(rgb, rotated, Core.ROTATE_90_CLOCKWISE);
-                return rotated;
-            case 180:
-                Core.rotate(rgb, rotated, Core.ROTATE_180);
-                return rotated;
-            case 270:
-                Core.rotate(rgb, rotated, Core.ROTATE_90_COUNTERCLOCKWISE);
-                return rotated;
-            default:
-                return rgb;
-        }
-    }
-
-    /** Clears the learned background, net and tracks; does nothing when the camera is not running. */
     public void requestBackgroundReset() {
         analysisThread.post(() -> {
             if (run != null) {

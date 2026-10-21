@@ -7,19 +7,10 @@ package com.justin.spikeballtracker.tracking;
  * <p>The frame is cut into {@value #CELL} px cells. Every frame each cell
  * decays by {@value #DECAY} and gains 1 per blob centred in it, so a cell
  * settles at (blobs per frame) / (1 - DECAY), a memory of about 50 frames. A
- * cell is static once it holds {@value #THRESH} of a blob per frame on average
- * (a blob there on ~65 % of recent frames). Nothing is static for the first
- * {@value #WARMUP_FRAMES} frames.
+ * cell is static once it holds {@value #THRESH} of a blob per frame.
  *
- * <p>Position (13 Oct 2026): the grid runs in front of the blob SVM, in
- * {@code SvmBlobDetector}. It learns from every blob in its area range (30-400 px), scored or not,
- * and blobs in static cells are not scored at all. It used to sit in
- * {@link BallTracker}, one grid per stream, learning only from candidates the
- * SVM had accepted. An offline replay against ground truth on S1-S3
- * (data/results/grid_position/REPORT.md) found tracker F1 within 0.004 of the
- * old position on every session, the same rallies found, and 13-22 % of blobs
- * not scored in typical footage (about half on busy S3 footage). Cells larger
- * than 16 px cost real ball frames there, so keep these constants.
+ * <p>Position: the grid runs in front of the blob SVM, in
+ * {@code SvmBlobDetector}. It learns from every blob in its area range (30-400 px).
  */
 public class OccupancyGrid {
 

@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * A rally from a played video: a time range of the source file, which is
- * already permanent, so nothing is copied until it is saved. Saving remuxes
- * the video track from the keyframe at or before {@code fromUs} up to
+ * A rally from a played video.
  * {@code toUs}; no re-encode, no audio.
  */
 public final class FileRally implements RallyFootage {

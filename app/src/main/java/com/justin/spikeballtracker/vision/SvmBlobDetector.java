@@ -17,33 +17,10 @@ import java.util.concurrent.Future;
 /**
  * Connected components of the ball mask (blobs), each scored by
  * {@link BlobSvm}; those scoring at least {@link BlobSvm#THRESHOLD} are the
- * candidates, the one stream the tracker follows.
+ * candidates.
  *
  * <p>Blobs whose features cannot be computed (fewer than 3 in-box pixels,
  * which the study skipped) get P(ball) = 0, so they are never candidates.
- *
- * <p>{@link #MIN_AREA} is 30 px (16 Oct 2026; 40 px from 13 Oct, 15 before).
- * The SVM was trained on 40-400 px blobs, so 30-39 px blobs are scored
- * outside the sizes it has seen; it has not been retrained for them. The
- * lower floor recovers small, distant balls: on S1C03's labelled rally
- * frames, balls cut by the floor fell from 14.5 % to 10.9 %, and in the
- * offline replay (five clips, old-SVM scores) per-frame tracking F1 rose by
- * about 0.01 with no more false rallies. Below about 40 px most blobs are
- * clutter (15-39 px blobs were 45-61 % of all blobs on frames 901-5400 of
- * S1C01, S3C01 and s5c04, box B), which the tracker's shape test must reject.
- *
- * <p>Static clutter is dropped before scoring (13 Oct 2026): an
- * {@link OccupancyGrid} in front of the SVM learns from every in-range blob,
- * and a blob whose cell is static is neither scored nor returned. The grid is
- * read before the frame's update, as the offline study that chose this
- * position ran it (data/results/grid_position/REPORT.md).
- *
- * <p>Cost: the frame and the label image are read out of OpenCV once per
- * frame, and everything per blob is plain Java ({@link BlobFeatures}, then
- * {@link BlobSvm}). Busy frames are split across worker threads plus the
- * calling one; results are the same as single-threaded and in the same order.
- * It uses {@link #WORKERS} workers (up to 3, leaving two cores for the
- * decoder and UI).
  *
  * <p>Owns reusable buffers and a thread pool: one instance belongs to one
  * pipeline thread, and {@link #release()} stops the pool.
@@ -53,7 +30,7 @@ public final class SvmBlobDetector {
     private static final int MIN_AREA = 30;
     private static final int MAX_AREA = 400;
 
-    /** Extra threads for busy frames; the calling thread takes a share too. */
+    /** Extra threads for busy frames*/
     private static final int WORKERS =
             Math.max(0, Math.min(3, Runtime.getRuntime().availableProcessors() - 2));
 
@@ -64,7 +41,7 @@ public final class SvmBlobDetector {
     private final Mat stats = new Mat();
     private final Mat centroids = new Mat();
 
-    /** One per share: [0] is the calling thread's, [1..WORKERS] the workers'. */
+    /** One per share: [0] is the calling thread's*/
     private final BlobFeatures[] features;
     private final double[][] f;
     private final ExecutorService pool;

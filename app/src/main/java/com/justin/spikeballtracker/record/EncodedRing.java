@@ -5,29 +5,12 @@ import java.nio.ByteBuffer;
 /**
  * The last few tens of seconds of encoded H.264 access units, held in RAM.
  *
- * <p>Why encoded rather than raw: a raw 1920x1080 YUV420 frame is ~3.1 MB, so a
- * minute at 30 fps would be ~5.6 GB. The same minute encoded at 10 Mbit/s is
- * ~75 MB. The ring stores the encoder's output verbatim, so saving is a remux,
- * never a re-encode, and costs no quality.
- *
- * <p>Storage is one preallocated byte array used as a circular buffer, plus a
- * parallel ring of per-packet metadata. A packet may straddle the end of the
- * array; it is simply split in two. Nothing is allocated per frame.
- *
- * <p>Packets are addressed by a monotonically increasing sequence number, so a
- * reader can hold a sequence across calls and find out later whether it has
- * since been evicted, rather than silently reading overwritten bytes.
- *
- * <p>Deliberately free of Android types so it can be unit-tested on a plain JVM.
- * Not thread safe: the writer (encoder callbacks) and the reader (copying out
- * one rally) both run on ReplayBuffer's Recorder thread.
  */
 public final class EncodedRing {
 
     private final byte[] data;
     private final long retainUs;
 
-    // Per-packet metadata, indexed by seq % maxPackets.
     private final int maxPackets;
     private final int[] offset;
     private final int[] size;
@@ -118,10 +101,7 @@ public final class EncodedRing {
 
     /**
      * Chooses the packets covering {@code [fromPts, toPts]}, starting on a
-     * keyframe so the clip decodes from its first frame: the latest keyframe
-     * at or before {@code fromPts}, or the oldest keyframe held when the ring
-     * no longer reaches back that far. Ends at the last packet not after
-     * {@code toPts}, or the newest packet if that comes first.
+     * keyframe so the clip decodes from its first frame.
      *
      * @return null when no keyframe falls before {@code toPts}
      */

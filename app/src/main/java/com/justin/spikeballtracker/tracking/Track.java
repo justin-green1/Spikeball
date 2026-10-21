@@ -24,7 +24,7 @@ public final class Track {
     private double a, b, c;
     private boolean dirty = true;
 
-    protected boolean confirmed = false;
+    boolean confirmed = false;
 
     public Track (int frameIndex, long tUs, double x, double y){
         this.t0Us = tUs;

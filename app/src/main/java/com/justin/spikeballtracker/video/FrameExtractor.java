@@ -20,13 +20,8 @@ import java.nio.ByteBuffer;
  * Decodes a video file frame by frame into the pipeline's working format: a
  * CV_8UC3 Y,U,V Mat at {@link #TARGET_SIZE}, in full range.
  *
- * <p>MediaCodec in buffer mode always delivers the stream's own resolution,
- * so a 1920x1080 clip decodes at 1920x1080 and {@link YuvFrameBuilder}
- * resizes each plane from there. Frames are processed as stored; a rotation
- * flag in the container is not applied.
  */
 public class FrameExtractor {
-
     private static final String TAG = "FrameExtractor";
     private static final long BUFFER_TIMEOUT_US = 10_000;
 
@@ -74,8 +69,8 @@ public class FrameExtractor {
      * Blocks until the video ends or the listener requests a stop.
      */
     public void streamFrames(Uri videoUri, FrameListener listener) {
-        MediaExtractor extractor = null;   // demuxes the file into encoded samples
-        MediaCodec codec = null;           // decodes them
+        MediaExtractor extractor = null;
+        MediaCodec codec = null;
 
         try {
             extractor = new MediaExtractor();

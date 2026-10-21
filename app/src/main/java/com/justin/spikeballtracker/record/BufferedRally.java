@@ -8,9 +8,7 @@ import java.nio.ByteBuffer;
 
 /**
  * A camera rally: its encoded packets copied out of the replay ring, with the
- * stream headers and rotation they need. Independent of the ring, so the
- * ring can keep overwriting itself, and even be cleared by a new camera
- * session, without touching it.
+ * stream headers and rotation they need.
  *
  * <p>Immutable, so a save can read it on one thread while a newer rally
  * replaces it on another.
@@ -33,7 +31,6 @@ public final class BufferedRally implements RallyFootage {
         int track = muxer.addTrack(format);
         muxer.start();
 
-        // A direct buffer, as the old replay save used; one packet at a time.
         ByteBuffer scratch = ByteBuffer.allocateDirect(Math.max(packets.maxPacketSize(), 64 * 1024));
         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
         long firstPts = packets.ptsUs[0];
@@ -42,7 +39,7 @@ public final class BufferedRally implements RallyFootage {
             scratch.clear();
             scratch.put(packets.data, packets.offset[i], packets.size[i]);
             scratch.flip();
-            // Rebased to zero: camera timestamps count from device boot.
+
             info.set(0, packets.size[i], packets.ptsUs[i] - firstPts,
                     packets.keyFrame[i] ? MediaCodec.BUFFER_FLAG_KEY_FRAME : 0);
             muxer.writeSampleData(track, scratch, info);

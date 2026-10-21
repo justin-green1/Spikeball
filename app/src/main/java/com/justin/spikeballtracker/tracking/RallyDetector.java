@@ -7,23 +7,10 @@ import java.util.List;
 /**
  * Decides which stretches of a run are rallies.
  *
- * <p><b>R1, net-linked tracks.</b> The tracks are BallTracker's own: each
- * confirmed track it reports as the ball (most points). Track building is not
- * touched here. When the tracker drops such a track (or the run ends), the
- * track's own least-squares fit (x linear, y quadratic in time) is followed
- * from {@link #EXTEND_US} before its first point to {@link #EXTEND_US} after
- * its last. If that curve passes through the net box anywhere, the track is
- * net-linked, and its frames, widened to the first and last moment the curve
- * is inside the box, are marked as cover.
+ * <p><b>R1: net-linked tracks</b>
  *
- * <p><b>R2, score and rallies</b> (unchanged): every frame scores half its
- * 90-frame window's ball share plus half its cover share; hysteresis, merging,
- * a minimum length and snapping to the first and last ball turn that into rallies.
+ * <p><b>R2: score and rallies</b>
  *
- * <p>Offline replay 19 Oct 2026 (studies/net_band; S1C03, S2C01, S2C02, S2C04,
- * S2C05; YOLO box): 49 of 98 labelled rallies with 3 false, against 52 with 6
- * false for the previous design (output rebuilt into its own tracks, 0.5 s
- * extension, padded zone). 0.4 s found 52 with 3 false; 0.2 s was chosen.
  */
 public class RallyDetector {
     //---- R1 constants: extending ball tracks to the net.

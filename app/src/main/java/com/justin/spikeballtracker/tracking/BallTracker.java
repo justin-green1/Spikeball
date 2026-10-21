@@ -31,58 +31,20 @@ import java.util.List;
  * answer for each frame is emitted {@link #DELAY} frames late, so a track
  * confirmed or re-found within that window back-fills the frames before it.
  *
- * <p>Replay on S1C03, S2C01, S2C02, S2C04 and S2C05 (16 Oct 2026, old-SVM
- * blob scores, 30 px blob floor), against the previous design (young gate
- * 1200 px/s, 6 points to confirm, curvature from 315 px/s^2): labelled rallies
- * 55/82 with 3 false (was 52, 5 false); per-frame tracking F1 0.506 (0.488);
- * simulated 4-15 frame occlusions bridged 85-59 % (87-61 %).
  */
 public class BallTracker {
 
-    // seeds and stubs --
-    /**
-     * A seed's second point may be this far from it per frame elapsed: up to
-     * 150 px if it comes 3 frames later, so a fast ball (20-40 px per frame)
-     * that skips a frame can still be picked up.
-     */
     private static final double SEED_REACH_PX_PER_FRAME = 50.0;
-    /** Largest change in velocity a third point may imply. */
     private static final double SEED_DV_PX_S            = 750.0;
 
-    // gates --
     private static final double GATE_PX                 = 14.0;
-    /**
-     * The gate widens by this much for every frame a track (3+ points) has
-     * gone without a point, beyond the usual one: 4 px per missed frame at
-     * 30 fps, so 14 px after one frame, 50 px after ten, about 72 px at the
-     * 15-frame limit. Bridges occlusions whose re-sighting has drifted from
-     * the extrapolation.
-     */
     private static final double GATE_GROW_PX_PER_S      = 120.0;
     private static final long   FRAME_US                = 33_333L;
 
-    // dropping --
-    /**
-     * A track of 4+ points survives 15 frames without a point (dropped after
-     * 15.5), so a ball hidden for up to half a second can be picked up again by
-     * the same track. DELAY (15 frames) limits how much of a gap can still be
-     * filled in the output once the ball reappears. It applies from 4 points,
-     * not only while confirmed: most flights pass the span test only after
-     * 6-10 points, and an unconfirmed flight that dies at an occlusion cannot
-     * be bridged (simulated 4-15 frame occlusions bridged ~40 % that way,
-     * ~85-59 % this way).
-     */
-    private static final long   DROP_AFTER_US           = 516_667L;
-    /** Seeds and stubs (under 4 points) are dropped after 3 frames without a point. */
-    private static final long   STUB_DROP_AFTER_US      = 116_667L;
 
-    // confirmation --
+    private static final long   DROP_AFTER_US           = 516_667L;
+    private static final long   STUB_DROP_AFTER_US      = 116_667L;
     private static final int    MIN_POINTS              = 4;
-    /**
-     * The curvature floor is 0: any downward-curving or straight path passes
-     * on curvature (a fast shot can look straight over a few frames). The
-     * ceiling still rejects paths bending harder than gravity allows.
-     */
     private static final double MIN_CURV                = 0.0;
     private static final double MAX_CURV                = 1350.0;
     private static final double MIN_SPAN                = 60.0;
@@ -106,9 +68,7 @@ public class BallTracker {
 
     private Output latest = null;
 
-    /** The confirmed track reported as the ball on the latest frame, or null. */
     private Track ballTrack = null;
-    /** Tracks of 4+ points dropped on the latest frame. */
     private final List<Track> dropped = new ArrayList<>();
 
     public BallTracker(){
@@ -117,7 +77,7 @@ public class BallTracker {
 
     /**
      * One frame's candidates: blobs the SVM scored at or above
-     * {@code BlobSvm.THRESHOLD}, static clutter already removed.
+     * {@code BlobSvm.THRESHOLD}
      */
     public void process(int frameIndex, long tUs, List<BallCandidate> candidates){
         dropped.clear();
@@ -127,11 +87,10 @@ public class BallTracker {
         slotHas[s] = false;
 
         int n = candidates.size();
-        boolean[] claimed = new boolean[n];   // by a 4+ point track: off limits to everyone else
-        boolean[] used = new boolean[n];      // by any track: does not seed a new one
+        boolean[] claimed = new boolean[n];
+        boolean[] used = new boolean[n];
 
-        // Longest track first: it gets first pick of the candidates. The sort
-        // is stable, so equal lengths keep their order from the last frame.
+        // Longest track first: it gets first pick of the candidates.
         tracks.sort((a,b) -> Integer.compare(b.size(), a.size()));
 
         born.clear();
@@ -203,7 +162,7 @@ public class BallTracker {
         emit(frameIndex - DELAY);
     }
 
-    /** 14 px, plus 4 px for every frame beyond the usual one since the track's last point. */
+    /** 14 px, plus 4 px for every frame */
     private static double gate(long dtUs){
         double missedUs = Math.max(0L, dtUs - FRAME_US);
         return GATE_PX + GATE_GROW_PX_PER_S * missedUs / 1e6;
@@ -225,10 +184,9 @@ public class BallTracker {
     }
 
     /**
-     * Turns a seed into one 2-point stub for every unclaimed candidate within
-     * reach (SEED_REACH_PX_PER_FRAME per elapsed frame).
+     * Turns a seed into one 2-point
      *
-     * @return true if at least one stub was made, so the seed can retire
+     * @return true if at least one stub was made
      */
     private boolean branch(Track seed, List<BallCandidate> candidates, boolean[] claimed,
                            boolean[] used, long dtUs, int frameIndex, long tUs){
@@ -251,7 +209,6 @@ public class BallTracker {
         return branched;
     }
 
-    /** @return the unclaimed candidate implying the smallest velocity change under SEED_DV_PX_S, or -1 */
     private static int smallestVelocityChange(Track t, List<BallCandidate> candidates,
                                               boolean[] claimed, long tUs){
         Track.Point p1 = t.points().get(0), p2 = t.points().get(1);
@@ -269,10 +226,7 @@ public class BallTracker {
         return best;
     }
 
-    /**
-     * Where a 3-point stub expects its fourth point: y on the exact parabola
-     * through its three points (Lagrange form), x on its straight-line fit.
-     */
+
     private static double[] parabolaThrough3(Track t, long tUs){
         List<Track.Point> p = t.points();
         double t0 = p.get(0).tUs / 1e6, t1 = p.get(1).tUs / 1e6, t2 = p.get(2).tUs / 1e6;
@@ -343,15 +297,13 @@ public class BallTracker {
     }
 
     /**
-     * The confirmed track with the most points on the latest frame: the track
-     * the ball is being taken from, before the {@link #DELAY}. Null if none.
-     * Read only; the tracker keeps extending it.
+     * The confirmed track with the most points on the latest frame
      */
     public Track ballTrack() {
         return ballTrack;
     }
 
-    /** Tracks of 4+ points the latest frame dropped; their fits are final. */
+    /** Tracks of 4+ points the latest frame dropped*/
     public List<Track> dropped() {
         return java.util.Collections.unmodifiableList(dropped);
     }

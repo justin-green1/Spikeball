@@ -35,13 +35,8 @@ import java.util.Locale;
 
 /**
  * Wiring only: two frame sources, one ImageView, the buttons that switch
- * between them, and the last-rally save. Anything that touches pixels lives
- * in a source.
+ * between them, and the last-rally save.
  *
- * <p>Threads: this UI thread, plus three {@link WorkerThread}s. This activity
- * owns Analysis, which both sources share (only one runs at a time);
- * ReplayBuffer owns Recorder and RallySaver owns Saver. Callbacks (frames,
- * rallies, saves) arrive on those threads and post UI changes back here.
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -59,9 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private VideoPlayer videoPlayer;
     private CameraSource cameraSource;
     private RallySaver rallySaver;
-
-    // Activity result contracts must be registered as field initialisers;
-    // registering after the activity is STARTED throws.
 
     private final ActivityResultLauncher<String[]> videoPickerLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
@@ -85,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
         frameImageView = findViewById(R.id.frame_image_view);
 
-        // Before any source exists: each pipeline builds its own network from these bytes.
         NetDetector.loadModel(getAssets());
 
         analysis = new WorkerThread("Analysis");
@@ -130,9 +121,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * A source confirmed a rally: keep its footage as the last rally, and
-     * say so briefly. Called on Analysis (video) or Recorder (camera, once
-     * the footage is copied); everything here just posts onwards.
+     * A source confirmed a rally make the save rally button visible
      */
     private void onRally(RallyDetector.Rally rally, RallyFootage footage) {
         rallySaver.keep(footage);
@@ -158,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /** Safe from any thread. */
     private void toast(String message) {
         runOnUiThread(() -> {
             if (!isFinishing() && !isDestroyed()) {
@@ -167,13 +155,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * The one sink. Called on the Analysis thread, so the Bitmap is built
-     * there and only the assignment is posted to the UI thread.
-     *
-     * <p>A fresh Bitmap per frame is deliberate: it crosses threads, and
-     * reusing one while the ImageView is mid-draw tears.
-     */
     private void showFrame(Mat displayMat) {
         Bitmap bitmap = Bitmap.createBitmap(
                 displayMat.cols(), displayMat.rows(), Bitmap.Config.ARGB_8888);

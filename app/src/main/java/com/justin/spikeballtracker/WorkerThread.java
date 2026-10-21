@@ -19,10 +19,6 @@ import java.util.concurrent.Executor;
  *       and writing it to an MP4.</li>
  * </ul>
  *
- * <p>The rule that keeps this simple: each thread's state is touched only by
- * that thread. Other threads ask for something by posting a job, and data
- * crosses between threads only as objects nobody changes afterwards (a copied
- * clip, a file range). So nothing needs a lock.
  */
 public final class WorkerThread {
 

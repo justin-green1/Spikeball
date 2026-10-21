@@ -11,18 +11,11 @@ import java.util.Locale;
 
 /**
  * Holds the last rally's footage, from either source, and saves it to
- * {@code Movies/SpikeballTracker/} on request.
+ * {@code DCIM/Spikeball Tracker/} on request.
  *
  * <p>The footage is replaced only when a newer rally is kept; saving does not
  * clear it, so it can be saved more than once. It lives in RAM, so it is gone
  * when the app closes.
- *
- * <p>Runs on its own Saver {@link WorkerThread}, so writing a file never
- * holds up detection or the replay recording. {@link #keep} and
- * {@link #saveLast} may be called from any thread: both post to the Saver
- * thread, which is the only thread that touches the last rally. The footage
- * itself never changes once made (a copied clip or a file range), so handing
- * it over needs no lock.
  */
 public final class RallySaver {
 

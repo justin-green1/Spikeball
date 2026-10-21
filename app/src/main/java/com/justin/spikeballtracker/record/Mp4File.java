@@ -13,14 +13,12 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Where one saved MP4 goes, {@code Movies/SpikeballTracker/<name>}: a pending
- * MediaStore entry, published once the file is complete.
+ * Where one saved MP4 goes, {@code DCIM/SpikeballTracker/<name>}
  *
- * <p>Open, write through {@link #newMuxer()}, then always {@link #finish}.
  */
 final class Mp4File {
 
-    private static final String FOLDER = "SpikeballTracker";
+    private static final String FOLDER = "Spikeball Videos";
 
     private final ContentResolver resolver;
     private final Uri uri;
@@ -38,7 +36,7 @@ final class Mp4File {
         cv.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
         cv.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
         cv.put(MediaStore.MediaColumns.RELATIVE_PATH,
-                Environment.DIRECTORY_MOVIES + File.separator + FOLDER);
+                Environment.DIRECTORY_DCIM + File.separator + FOLDER);
         cv.put(MediaStore.MediaColumns.IS_PENDING, 1);
         Uri uri = resolver.insert(
                 MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), cv);

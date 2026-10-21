@@ -4,8 +4,6 @@ package com.justin.spikeballtracker.tracking;
 public final class BallCandidate {
     public final double x;
     public final double y;
-
-    /** The blob SVM's P(ball). */
     public final double pBall;
 
     public BallCandidate(double x, double y, double pBall) {

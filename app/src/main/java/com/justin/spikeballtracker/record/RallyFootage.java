@@ -6,8 +6,7 @@ import java.io.IOException;
 
 /**
  * One confirmed rally's video, held until it is saved or replaced by the
- * next rally. {@link BufferedRally} is a copy out of the camera's replay ring;
- * {@link FileRally} points at a range of the video file being played.
+ * next rally.
  */
 public interface RallyFootage {
 
@@ -19,7 +18,7 @@ public interface RallyFootage {
 
     /**
      * Adds a video track to {@code muxer}, starts it, writes every sample and
-     * stops it. The caller creates and releases the muxer.
+     * stops it.
      *
      * @return the length written, first to last frame, in microseconds
      */
