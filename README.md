@@ -65,8 +65,3 @@ app/src/main/java/com/justin/spikeball/
 Threads: the UI thread, one **Analysis** thread (shared by both sources, so
 only one runs at a time), a **Recorder** thread (camera replay buffer) and a
 **Saver** thread (writing MP4s).
-
-## Notes
-
-- The package name and app ID are both `com.justin.spikeball`. The earlier
-  SpikeballTracker build used a different ID, so both can be installed.
