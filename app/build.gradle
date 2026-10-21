@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'com.justin.spikeballtracker'
+    namespace 'com.justin.spikeball'
     compileSdk {
         version = release(37)
     }
