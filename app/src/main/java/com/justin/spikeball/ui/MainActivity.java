@@ -159,7 +159,11 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bitmap = Bitmap.createBitmap(
                 displayMat.cols(), displayMat.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(displayMat, bitmap);
-        runOnUiThread(() -> frameImageView.setImageBitmap(bitmap));
+
+        runOnUiThread(() -> {
+            frameImageView.setImageBitmap(bitmap);
+        });
+
     }
 
     private void stopAllSources() {

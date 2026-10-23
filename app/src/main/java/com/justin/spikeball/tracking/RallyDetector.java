@@ -25,8 +25,8 @@ public class RallyDetector {
     private static final long   WINDOW_BACK_US  = 1_516_667L;
     private static final long   WINDOW_AHEAD_US = 1_483_333L;
     private static final double SCALE           = 0.8888888888888888;
-    private static final double HI              = 0.4;
-    private static final double LO              = 0.4 * 0.75;
+    private static final double HI              = 0.205;
+    private static final double LO              = 0.155;
     private static final long   MERGE_GAP_US    = 2_050_000L;
     private static final long   MIN_LEN_US      = 450_000L;
     private static final long   SNAP_PRE_US     = 266_667L;

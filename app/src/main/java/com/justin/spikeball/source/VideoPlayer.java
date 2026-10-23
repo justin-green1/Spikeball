@@ -106,6 +106,7 @@ public final class VideoPlayer {
             if (isCurrent(clip)) {
                 reportRallies(pipeline.finish(), videoUri);
             }
+
         } catch (RuntimeException e) {
             Log.e(TAG, "video playback failed", e);
         } finally {

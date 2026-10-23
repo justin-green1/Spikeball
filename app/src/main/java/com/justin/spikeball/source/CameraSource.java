@@ -27,7 +27,6 @@ import com.justin.spikeball.video.YuvFrameBuilder;
 import com.justin.spikeball.video.YuvRange;
 import com.justin.spikeball.vision.FramePipeline;
 
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
 import java.util.List;
@@ -254,13 +253,15 @@ public final class CameraSource {
             List<RallyDetector.Rally> rallies = current.pipeline.process(yuv, timestampUs, rgb);
             reportRallies(current, rallies, rallyListener);
 
+            target.onDisplayFrame(rgb);
+
         } catch (Exception e) {
             Log.e(TAG, "camera frame failed", e);
         } finally {
             proxy.close();   // without this the buffer pool drains and the stream stops
         }
     }
-    
+
     private void reportRallies(Run run, List<RallyDetector.Rally> rallies,
                                RallyListener listener) {
         if (listener == null) {
